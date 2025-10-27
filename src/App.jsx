@@ -11,9 +11,7 @@ import Register from './pages/auth/Register';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminBooks from './pages/admin/Books/index';
 import AdminAuthors from './pages/admin/Authors/index';
-import CreateAuthor from './pages/admin/Authors/Create';
 import AdminGenres from './pages/admin/Genres/index';
-import CreateGenre from './pages/admin/Genres/Create';
 import AdminTransactions from './pages/admin/Transactions/index';
 import AdminCustomers from './pages/admin/Customers/index';
 
@@ -69,19 +67,9 @@ const AppRoutes = () => {
           <AdminAuthors />
         </ProtectedRoute>
       } />
-      <Route path="/admin/authors/create" element={
-        <ProtectedRoute requiredRole="admin">
-          <CreateAuthor />
-        </ProtectedRoute>
-      } />
       <Route path="/admin/genres" element={
         <ProtectedRoute requiredRole="admin">
           <AdminGenres />
-        </ProtectedRoute>
-      } />
-      <Route path="/admin/genres/create" element={
-        <ProtectedRoute requiredRole="admin">
-          <CreateGenre />
         </ProtectedRoute>
       } />
       <Route path="/admin/transactions" element={

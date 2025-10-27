@@ -16,12 +16,6 @@ const Header = ({ onToggleSidebar }) => {
           >
             <FiMenu className="w-5 h-5" />
           </button>
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mr-3">
-              <FiBook className="w-4 h-4 text-white" />
-            </div>
-            <h1 className="text-xl font-semibold text-gray-800">BookSales</h1>
-          </div>
         </div>
 
         <div className="flex items-center space-x-4">
