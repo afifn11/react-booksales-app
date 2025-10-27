@@ -1,12 +1,11 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/constants';
 
-// Buat instance axios
+// instance axios
 const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
-// Tambahkan interceptor untuk menambahkan token ke header
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
