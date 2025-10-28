@@ -43,11 +43,11 @@ const Sidebar = ({ isOpen, onClose }) => {
       label: 'Transactions', 
       icon: <FiShoppingCart className="w-5 h-5" /> 
     },
-    { 
-      path: '/admin/customers', 
-      label: 'Customers', 
-      icon: <FiUser className="w-5 h-5" /> 
-    },
+    // { 
+    //   path: '/admin/customers', 
+    //   label: 'Customers', 
+    //   icon: <FiUser className="w-5 h-5" /> 
+    // },
   ];
 
   const customerMenuItems = [
@@ -108,7 +108,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                 <FiBook className="w-4 h-4 text-white" />
               </div>
               <h2 className="text-lg font-semibold text-gray-800">
-                {isAdmin ? 'Admin Panel' : 'BookSales'}
+                {isAdmin ? 'Admin BookSales' : 'BookSales'}
               </h2>
             </div>
           </div>

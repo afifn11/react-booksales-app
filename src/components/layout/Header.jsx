@@ -16,12 +16,6 @@ const Header = ({ onToggleSidebar }) => {
           >
             <FiMenu className="w-5 h-5" />
           </button>
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mr-3">
-              <FiBook className="w-4 h-4 text-white" />
-            </div>
-            <h1 className="text-xl font-semibold text-gray-800">BookSales</h1>
-          </div>
         </div>
 
         <div className="flex items-center space-x-4">
@@ -47,10 +41,6 @@ const Header = ({ onToggleSidebar }) => {
                     Signed in as <br />
                     <span className="font-medium">{user?.email}</span>
                   </div>
-                  <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                    <FiUser className="w-4 h-4 mr-3" />
-                    My Profile
-                  </button>
                   <button
                     onClick={logout}
                     className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"

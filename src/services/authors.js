@@ -1,18 +1,26 @@
-import { useApi } from '../hooks/useApi';
-
 export const authorService = {
   getAuthors: async (params = {}) => {
-    // Untuk service, kita tidak bisa menggunakan hook di sini
-    // Kita akan menggunakan axios langsung
     try {
-      const response = await fetch(`/api/authors?${new URLSearchParams(params)}`, {
+      const defaultParams = {
+        per_page: 100, // Limit untuk prevent too much data
+        ...params
+      };
+
+      const queryString = new URLSearchParams(defaultParams).toString();
+      const response = await fetch(`/api/authors?${queryString}`, {
         headers: {
           'Authorization': `Bearer ${JSON.parse(localStorage.getItem('token') || '""')}`,
           'Content-Type': 'application/json',
         },
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       return await response.json();
     } catch (error) {
+      console.error('Error fetching authors:', error);
       throw error;
     }
   },
@@ -25,8 +33,14 @@ export const authorService = {
           'Content-Type': 'application/json',
         },
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       return await response.json();
     } catch (error) {
+      console.error('Error fetching author:', error);
       throw error;
     }
   },
@@ -41,8 +55,15 @@ export const authorService = {
         },
         body: JSON.stringify(authorData),
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create author');
+      }
+      
       return await response.json();
     } catch (error) {
+      console.error('Error creating author:', error);
       throw error;
     }
   },
@@ -57,8 +78,15 @@ export const authorService = {
         },
         body: JSON.stringify(authorData),
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update author');
+      }
+      
       return await response.json();
     } catch (error) {
+      console.error('Error updating author:', error);
       throw error;
     }
   },
@@ -72,8 +100,15 @@ export const authorService = {
           'Content-Type': 'application/json',
         },
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete author');
+      }
+      
       return await response.json();
     } catch (error) {
+      console.error('Error deleting author:', error);
       throw error;
     }
   },

@@ -15,7 +15,10 @@ export const ROUTES = {
   ADMIN_GENRES: '/admin/genres',
   ADMIN_TRANSACTIONS: '/admin/transactions',
   CUSTOMER_BOOKS: '/customer/books',
+  CUSTOMER_BOOK_DETAIL: '/customer/books/:id',
   CUSTOMER_AUTHORS: '/customer/authors',
   CUSTOMER_PROFILE: '/customer/profile',
-  CUSTOMER_TRANSACTIONS: '/customer/transactions'
+  CUSTOMER_TRANSACTIONS: '/customer/transactions',
+  CUSTOMER_CHECKOUT: '/customer/checkout',
+  CUSTOMER_WISHLIST: '/customer/wishlist'
 };
