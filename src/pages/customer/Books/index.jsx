@@ -549,4 +549,61 @@ const CustomerBooks = () => {
   );
 };
 
+// Book Card Component
+const BookCard = ({ book, onAddToCart }) => {
+  return (
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+      <div className="h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center relative">
+        {book.cover_photo ? (
+          <img
+            src={book.cover_photo}
+            alt={book.title}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <FiBook className="w-16 h-16 text-blue-600 opacity-50" />
+        )}
+        {book.stock === 0 && (
+          <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-medium">
+            Out of Stock
+          </div>
+        )}
+      </div>
+      <Card.Body>
+        <h3 className="font-semibold text-lg mb-2 text-gray-900 line-clamp-2">{book.title}</h3>
+        <p className="text-gray-600 mb-2 text-sm">by {book.author?.name || 'Unknown Author'}</p>
+        
+        {book.genre && (
+          <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded mb-3">
+            {book.genre.name}
+          </span>
+        )}
+        
+        <p className="text-gray-700 text-sm mb-3 line-clamp-2">
+          {book.description || 'No description available.'}
+        </p>
+        
+        <div className="flex items-center justify-between mt-auto">
+          <div>
+            <span className="text-lg font-bold text-blue-600">
+              Rp {book.price?.toLocaleString() || '0'}
+            </span>
+            {book.stock > 0 && (
+              <p className="text-xs text-green-600">{book.stock} in stock</p>
+            )}
+          </div>
+          <Button 
+            size="small" 
+            onClick={() => onAddToCart(book.id)}
+            disabled={book.stock === 0}
+          >
+            <FiShoppingCart className="w-4 h-4 mr-1" />
+            {book.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+          </Button>
+        </div>
+      </Card.Body>
+    </Card>
+  );
+};
+
 export default CustomerBooks;
