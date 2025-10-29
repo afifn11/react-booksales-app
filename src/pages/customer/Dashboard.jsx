@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CustomerLayout from '../../components/layout/CustomerLayout';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import { bookService } from '../../services/books';
 import { transactionService } from '../../services/transactions';
-import { FiBook, FiShoppingCart, FiHeart, FiArrowRight, FiStar } from 'react-icons/fi';
+import { useCart } from '../../contexts/CartContext';
+import { useWishlist } from '../../contexts/WishlistContext';
+import { formatCurrency } from '../../utils/helpers';
+import { FiBook, FiShoppingCart, FiHeart, FiArrowRight, FiEye } from 'react-icons/fi';
 
 const CustomerDashboard = () => {
   const [featuredBooks, setFeaturedBooks] = useState([]);
@@ -17,6 +21,10 @@ const CustomerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  const { addToCart } = useCart();
+  const { wishlistItems, addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const navigate = useNavigate();
+
   useEffect(() => {
     loadDashboardData();
   }, []);
@@ -26,7 +34,7 @@ const CustomerDashboard = () => {
       setLoading(true);
       
       // Load featured books
-      const booksResponse = await bookService.getBooks({ per_page: 6 });
+      const booksResponse = await bookService.getBooks({ per_page: 8 });
       setFeaturedBooks(booksResponse.data || []);
       
       // Load user transactions for stats
@@ -34,13 +42,13 @@ const CustomerDashboard = () => {
       const transactions = transactionsResponse.data || [];
       
       // Calculate stats
-      const booksPurchased = transactions.reduce((total, transaction) => total + transaction.quantity, 0);
+      const booksPurchased = transactions.reduce((total, transaction) => total + (transaction.quantity || 1), 0);
       const pendingOrders = transactions.filter(t => !t.completed).length;
       
       setStats({
         booksPurchased,
         pendingOrders,
-        wishlistedItems: 0 // This would come from a wishlist service
+        wishlistedItems: wishlistItems.length
       });
       
     } catch (error) {
@@ -86,6 +94,23 @@ const CustomerDashboard = () => {
     return () => clearInterval(interval);
   }, [banners.length]);
 
+  const handleAddToCart = (book) => {
+    addToCart(book);
+    // Bisa tambahkan toast notification di sini
+  };
+
+  const handleViewDetails = (bookId) => {
+    navigate(`/customer/books/${bookId}`);
+  };
+
+  const handleWishlist = (book) => {
+    if (isInWishlist(book.id)) {
+      removeFromWishlist(book.id);
+    } else {
+      addToWishlist(book);
+    }
+  };
+
   if (loading) {
     return (
       <CustomerLayout>
@@ -120,7 +145,11 @@ const CustomerDashboard = () => {
                     <div className="max-w-2xl ml-12 text-white">
                       <h1 className="text-4xl font-bold mb-4">{banner.title}</h1>
                       <p className="text-xl mb-6 opacity-90">{banner.description}</p>
-                      <Button size="large" className="bg-white text-gray-900 hover:bg-gray-100">
+                      <Button 
+                        size="large" 
+                        onClick={() => navigate('/customer/books')}
+                        className="bg-white text-gray-900 hover:bg-gray-100"
+                      >
                         {banner.buttonText} <FiArrowRight className="ml-2 w-4 h-4" />
                       </Button>
                     </div>
@@ -162,14 +191,24 @@ const CustomerDashboard = () => {
         <section>
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Featured Books</h2>
-            <Button variant="outline" onClick={() => window.location.href = '/customer/books'}>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/customer/books')}
+            >
               View All <FiArrowRight className="ml-2 w-4 h-4" />
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {featuredBooks.map((book) => (
-              <BookCard key={book.id} book={book} />
+              <BookCard 
+                key={book.id} 
+                book={book}
+                onAddToCart={handleAddToCart}
+                onViewDetails={handleViewDetails}
+                onWishlist={handleWishlist}
+                isWishlisted={isInWishlist(book.id)}
+              />
             ))}
           </div>
         </section>
@@ -200,61 +239,117 @@ const CustomerDashboard = () => {
   );
 };
 
-// Book Card Component
-const BookCard = ({ book }) => {
-  const handleAddToCart = () => {
-    // Implement add to cart functionality
-    console.log('Add to cart:', book.id);
-  };
+// Book Card Component for Dashboard
+const BookCard = ({ book, onAddToCart, onViewDetails, onWishlist, isWishlisted }) => {
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
-      <div className="h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center relative">
-        {book.cover_photo ? (
-          <img
-            src={book.cover_photo}
-            alt={book.title}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <FiBook className="w-16 h-16 text-blue-600 opacity-50" />
-        )}
-        {book.stock === 0 && (
-          <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-medium">
-            Out of Stock
-          </div>
-        )}
-      </div>
-      <Card.Body>
-        <h3 className="font-semibold text-lg mb-2 text-gray-900 line-clamp-2">{book.title}</h3>
-        <p className="text-gray-600 mb-2 text-sm">by {book.author?.name || 'Unknown Author'}</p>
-        
-        {book.genre && (
-          <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded mb-3">
-            {book.genre.name}
-          </span>
-        )}
-        
-        <div className="flex items-center justify-between mt-3">
-          <div>
-            <span className="text-lg font-bold text-blue-600">
-              Rp {book.price?.toLocaleString() || '0'}
-            </span>
-            {book.stock > 0 && (
-              <p className="text-xs text-green-600">{book.stock} in stock</p>
-            )}
-          </div>
-          <Button 
-            size="small" 
-            onClick={handleAddToCart}
-            disabled={book.stock === 0}
+    <div 
+      className="relative group"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 h-full flex flex-col">
+        {/* Book Cover with Overlay */}
+        <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50">
+          {book.cover_photo ? (
+            <img
+              src={book.cover_photo}
+              alt={book.title}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <FiBook className="w-12 h-12 text-blue-300" />
+            </div>
+          )}
+          
+          {/* Stock Badge */}
+          {book.stock === 0 && (
+            <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-medium">
+              Out of Stock
+            </div>
+          )}
+          
+          {/* Wishlist Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onWishlist(book);
+            }}
+            className={`absolute top-2 left-2 p-2 rounded-full transition-colors ${
+              isWishlisted 
+                ? 'bg-red-500 text-white' 
+                : 'bg-white text-gray-600 hover:bg-red-500 hover:text-white'
+            }`}
           >
-            <FiShoppingCart className="w-4 h-4 mr-1" />
-            {book.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-          </Button>
+            <FiHeart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
+          </button>
+          
+          {/* Hover Overlay with Buttons */}
+          <div className={`absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center transition-opacity duration-300 ${
+            isHovered ? 'opacity-100' : 'opacity-0'
+          }`}>
+            <div className="flex flex-col space-y-2">
+              <Button 
+                size="small" 
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddToCart(book);
+                }}
+                disabled={book.stock === 0}
+                className="bg-transparent text-white hover:bg-blue-600 hover:text-white border-white hover:border-blue-600"
+              >
+                <FiShoppingCart className="w-4 h-4 mr-1" />
+                {book.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+              </Button>
+              <Button 
+                size="small" 
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onViewDetails(book.id);
+                }}
+                className="bg-transparent text-white border-white hover:bg-white hover:text-gray-900"
+              >
+                <FiEye className="w-4 h-4 mr-1" />
+                View Details
+              </Button>
+            </div>
+          </div>
         </div>
-      </Card.Body>
-    </Card>
+
+        {/* Book Info */}
+        <div className="p-3 flex-1 flex flex-col">
+          <h3 className="font-semibold text-sm mb-1 text-gray-900 line-clamp-2 leading-tight">
+            {book.title}
+          </h3>
+          <p className="text-gray-600 text-xs mb-2 line-clamp-1">
+            by {book.author?.name || 'Unknown Author'}
+          </p>
+          
+          {book.genre && (
+            <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded mb-2">
+              {book.genre.name}
+            </span>
+          )}
+          
+          <div className="mt-auto pt-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-lg font-bold text-blue-600">
+                  {formatCurrency(book.price)}
+                </span>
+                {book.stock > 0 && (
+                  <p className="text-xs text-green-600 mt-1">{book.stock} in stock</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
   );
 };
 

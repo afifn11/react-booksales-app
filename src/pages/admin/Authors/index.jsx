@@ -1,3 +1,5 @@
+// src/pages/admin/Authors/index.jsx
+
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import Card from '../../../components/ui/Card';
@@ -7,7 +9,15 @@ import Input from '../../../components/ui/Input';
 import Modal from '../../../components/ui/Modal';
 import LoadingSpinner from '../../../components/ui/LoadingSpinner';
 import { authorService } from '../../../services/authors';
-import { FiEdit2, FiTrash2, FiPlus, FiUser } from 'react-icons/fi';
+import { 
+  FiEdit2, 
+  FiTrash2, 
+  FiPlus, 
+  FiUser,
+  FiSearch,
+  FiFilter,
+  FiEye
+} from 'react-icons/fi';
 
 const Authors = () => {
   const [authors, setAuthors] = useState([]);
@@ -15,19 +25,24 @@ const Authors = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedAuthor, setSelectedAuthor] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({
+    search: '',
+    sort_by: 'created_at',
+    sort_order: 'desc'
+  });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
     loadAuthors();
-  }, []);
+  }, [filters]);
 
   const loadAuthors = async () => {
     try {
       setLoading(true);
-      const response = await authorService.getAuthors();
+      const response = await authorService.getAuthors(filters);
       setAuthors(response.data || []);
     } catch (error) {
       console.error('Failed to load authors:', error);
@@ -84,10 +99,25 @@ const Authors = () => {
     setError('');
   };
 
-  const filteredAuthors = authors.filter(author =>
-    author.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (author.bio && author.bio.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const openDetailModal = (author) => {
+    setSelectedAuthor(author);
+    setShowDetailModal(true);
+  };
+
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      search: '',
+      sort_by: 'created_at',
+      sort_order: 'desc'
+    });
+  };
 
   // Clear messages after 3 seconds
   useEffect(() => {
@@ -100,7 +130,7 @@ const Authors = () => {
     }
   }, [success, error]);
 
-  if (loading) {
+  if (loading && authors.length === 0) {
     return (
       <AdminLayout>
         <div className="flex justify-center items-center h-64">
@@ -137,90 +167,128 @@ const Authors = () => {
           </div>
         )}
 
-        {/* Search and Table */}
+        {/* Filters */}
+        <Card>
+          <Card.Body>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="relative">
+                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Search authors..."
+                  className="pl-10"
+                  value={filters.search}
+                  onChange={(e) => handleFilterChange('search', e.target.value)}
+                />
+              </div>
+              
+              <div className="md:col-span-2"></div> {/* Spacer */}
+
+              <div className="flex space-x-2">
+                <select
+                  value={filters.sort_by}
+                  onChange={(e) => handleFilterChange('sort_by', e.target.value)}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                >
+                  <option value="created_at">Newest</option>
+                  <option value="name">Name</option>
+                  <option value="books_count">Books Count</option>
+                </select>
+                <Button variant="outline" onClick={clearFilters}>
+                  <FiFilter className="w-4 h-4 mr-2" />
+                  Clear
+                </Button>
+              </div>
+            </div>
+          </Card.Body>
+        </Card>
+
+        {/* Authors Table */}
         <Card>
           <Card.Header>
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium text-gray-900">All Authors</h3>
-              <div className="w-64">
-                <Input
-                  type="text"
-                  placeholder="Search authors..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+              <h3 className="text-lg font-medium text-gray-900">
+                All Authors ({authors.length})
+              </h3>
             </div>
           </Card.Header>
           <Card.Body>
-            <Table>
-              <Table.Head>
-                <Table.Header>Photo</Table.Header>
-                <Table.Header>Name</Table.Header>
-                <Table.Header>Bio</Table.Header>
-                <Table.Header>Books Count</Table.Header>
-                <Table.Header>Actions</Table.Header>
-              </Table.Head>
-              <Table.Body>
-                {filteredAuthors.map((author) => (
-                  <Table.Row key={author.id}>
-                    <Table.Cell>
-                      <AuthorPhoto author={author} />
-                    </Table.Cell>
-                    <Table.Cell className="font-medium text-gray-900">
-                      {author.name}
-                    </Table.Cell>
-                    <Table.Cell>
-                      {author.bio ? (
-                        <span className="text-gray-600">
-                          {author.bio.length > 100 
-                            ? `${author.bio.substring(0, 100)}...` 
-                            : author.bio
-                          }
-                        </span>
-                      ) : (
-                        <span className="text-gray-400">No bio</span>
-                      )}
-                    </Table.Cell>
-                    <Table.Cell>
-                      <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                        {author.books_count || 0} books
-                      </span>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <div className="flex space-x-2">
-                        <Button 
-                          variant="outline" 
-                          size="small"
-                          onClick={() => openEditModal(author)}
-                        >
-                          <FiEdit2 className="w-3 h-3 mr-1" />
-                          Edit
-                        </Button>
-                        <Button 
-                          variant="danger" 
-                          size="small"
-                          onClick={() => openDeleteModal(author)}
-                        >
-                          <FiTrash2 className="w-3 h-3 mr-1" />
-                          Delete
-                        </Button>
-                      </div>
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-            </Table>
-
-            {filteredAuthors.length === 0 && (
+            {authors.length === 0 ? (
               <div className="text-center py-8">
+                <FiUser className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-500">No authors found.</p>
-                {searchTerm && (
-                  <p className="text-gray-400 text-sm mt-1">
-                    Try adjusting your search terms
-                  </p>
-                )}
+                <p className="text-gray-400 text-sm mt-1">
+                  {filters.search 
+                    ? 'Try adjusting your filters' 
+                    : 'Get started by adding your first author'
+                  }
+                </p>
               </div>
+            ) : (
+              <Table>
+                <Table.Head>
+                  <Table.Header>Photo</Table.Header>
+                  <Table.Header>Name</Table.Header>
+                  <Table.Header>Bio</Table.Header>
+                  <Table.Header>Books Count</Table.Header>
+                  <Table.Header>Actions</Table.Header>
+                </Table.Head>
+                <Table.Body>
+                  {authors.map((author) => (
+                    <Table.Row key={author.id}>
+                      <Table.Cell>
+                        <AuthorPhoto author={author} />
+                      </Table.Cell>
+                      <Table.Cell>
+                        <div>
+                          <p className="font-medium text-gray-900">{author.name}</p>
+                        </div>
+                      </Table.Cell>
+                      <Table.Cell>
+                        {author.bio ? (
+                          <span className="text-gray-600">
+                            {author.bio.length > 100 
+                              ? `${author.bio.substring(0, 100)}...` 
+                              : author.bio
+                            }
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">No bio</span>
+                        )}
+                      </Table.Cell>
+                      <Table.Cell>
+                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                          {author.books_count || 0} books
+                        </span>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <div className="flex space-x-2">
+                          <Button 
+                            variant="outline" 
+                            size="small"
+                            onClick={() => openDetailModal(author)}
+                          >
+                            <FiEye className="w-3 h-3" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="small"
+                            onClick={() => openEditModal(author)}
+                          >
+                            <FiEdit2 className="w-3 h-3" />
+                          </Button>
+                          <Button 
+                            variant="danger" 
+                            size="small"
+                            onClick={() => openDeleteModal(author)}
+                          >
+                            <FiTrash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table>
             )}
           </Card.Body>
         </Card>
@@ -251,6 +319,15 @@ const Authors = () => {
           author={selectedAuthor}
           onConfirm={handleDeleteAuthor}
         />
+
+        <AuthorDetailModal
+          isOpen={showDetailModal}
+          onClose={() => {
+            setShowDetailModal(false);
+            setSelectedAuthor(null);
+          }}
+          author={selectedAuthor}
+        />
       </div>
     </AdminLayout>
   );
@@ -260,26 +337,26 @@ const Authors = () => {
 const AuthorPhoto = ({ author }) => {
   if (author.photo) {
     return (
-      <div className="flex-shrink-0">
+      <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
         <img
           src={author.photo}
           alt={author.name}
-          className="w-10 h-10 rounded-full object-cover"
+          className="w-full h-full object-cover"
           onError={(e) => {
             e.target.style.display = 'none';
             e.target.nextSibling.style.display = 'flex';
           }}
         />
-        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hidden">
-          <FiUser className="w-5 h-5 text-gray-400" />
+        <div className="w-full h-full bg-gray-300 rounded-full flex items-center justify-center hidden">
+          <FiUser className="w-6 h-6 text-gray-500" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
-      <FiUser className="w-5 h-5 text-blue-600" />
+    <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-200 rounded-full flex items-center justify-center">
+      <FiUser className="w-6 h-6 text-blue-600" />
     </div>
   );
 };
@@ -318,7 +395,7 @@ const CreateAuthorModal = ({ isOpen, onClose, onSubmit }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add New Author">
+    <Modal isOpen={isOpen} onClose={onClose} title="Add New Author" size="large">
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -457,7 +534,7 @@ const EditAuthorModal = ({ isOpen, onClose, author, onSubmit }) => {
   if (!author) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Edit Author">
+    <Modal isOpen={isOpen} onClose={onClose} title="Edit Author" size="large">
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -615,6 +692,58 @@ const DeleteAuthorModal = ({ isOpen, onClose, author, onConfirm }) => {
             loading={loading}
           >
             Delete Author
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+// Author Detail Modal Component
+const AuthorDetailModal = ({ isOpen, onClose, author }) => {
+  if (!author) return null;
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Author Details" size="medium">
+      <div className="space-y-6">
+        <div className="flex items-start space-x-4">
+          <div className="w-24 h-24 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
+            {author.photo ? (
+              <img
+                src={author.photo}
+                alt={author.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-200 flex items-center justify-center">
+                <FiUser className="w-8 h-8 text-blue-600" />
+              </div>
+            )}
+          </div>
+          
+          <div className="flex-1">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{author.name}</h3>
+            <div className="space-y-2">
+              <div className="flex items-center text-sm">
+                <span className="text-gray-600 w-20">Books:</span>
+                <span className="font-medium bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full text-xs">
+                  {author.books_count || 0} books
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {author.bio && (
+          <div>
+            <h4 className="text-sm font-medium text-gray-900 mb-2">Biography</h4>
+            <p className="text-gray-600 text-sm leading-relaxed">{author.bio}</p>
+          </div>
+        )}
+
+        <div className="flex justify-end pt-4">
+          <Button variant="outline" onClick={onClose}>
+            Close
           </Button>
         </div>
       </div>

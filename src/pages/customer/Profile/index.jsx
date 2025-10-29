@@ -1,3 +1,5 @@
+// src/pages/customer/Profile/index.jsx
+
 import React, { useState } from 'react';
 import CustomerLayout from '../../../components/layout/CustomerLayout';
 import Card from '../../../components/ui/Card';

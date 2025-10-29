@@ -41,10 +41,6 @@ const Header = ({ onToggleSidebar }) => {
                     Signed in as <br />
                     <span className="font-medium">{user?.email}</span>
                   </div>
-                  <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                    <FiUser className="w-4 h-4 mr-3" />
-                    My Profile
-                  </button>
                   <button
                     onClick={logout}
                     className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"

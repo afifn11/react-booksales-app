@@ -1,4 +1,7 @@
+// src/pages/customer/Authors/index.jsx
+
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CustomerLayout from '../../../components/layout/CustomerLayout';
 import Card from '../../../components/ui/Card';
 import Input from '../../../components/ui/Input';
@@ -11,6 +14,7 @@ const CustomerAuthors = () => {
   const [authors, setAuthors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadAuthors();
@@ -27,6 +31,11 @@ const CustomerAuthors = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleViewBooks = (authorId, authorName) => {
+    // Navigate to books page with author filter using React Router
+    navigate(`/customer/books?author_id=${authorId}&author_name=${encodeURIComponent(authorName)}`);
   };
 
   const AuthorCard = ({ author }) => {
@@ -63,7 +72,7 @@ const CustomerAuthors = () => {
           variant="outline" 
           size="small" 
           className="w-full mt-4"
-          onClick={() => window.location.href = `/customer/books?author=${author.id}`}
+          onClick={() => handleViewBooks(author.id, author.name)}
         >
           View Books
         </Button>

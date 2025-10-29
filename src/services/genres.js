@@ -1,7 +1,12 @@
 export const genreService = {
   getGenres: async (params = {}) => {
     try {
-      const queryString = new URLSearchParams(params).toString();
+      const defaultParams = {
+        per_page: 100, // Limit untuk prevent too much data
+        ...params
+      };
+      
+      const queryString = new URLSearchParams(defaultParams).toString();
       const response = await fetch(`/api/genres?${queryString}`, {
         headers: {
           'Authorization': `Bearer ${JSON.parse(localStorage.getItem('token') || '""')}`,

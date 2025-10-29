@@ -1,3 +1,5 @@
+// src/pages/customer/Transactions/index.jsx
+
 import React, { useState, useEffect } from 'react';
 import CustomerLayout from '../../../components/layout/CustomerLayout';
 import Card from '../../../components/ui/Card';
