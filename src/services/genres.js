@@ -2,7 +2,7 @@ export const genreService = {
   getGenres: async (params = {}) => {
     try {
       const defaultParams = {
-        per_page: 100, // Limit untuk prevent too much data
+        per_page: 100, 
         ...params
       };
       

@@ -115,7 +115,7 @@ const Checkout = () => {
   };
 
   const subtotal = getCartTotal();
-  const shippingFee = 15000; // Flat rate
+  const shippingFee = 15000; 
   const total = subtotal + shippingFee;
 
   return (

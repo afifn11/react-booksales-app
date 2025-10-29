@@ -86,7 +86,7 @@ const CustomerBooks = () => {
     // Set new timeout untuk debounce
     const timeoutId = setTimeout(() => {
       loadBooks();
-    }, filters.search ? 500 : 300); // Debounce lebih lama untuk search
+    }, filters.search ? 500 : 300); 
 
     setSearchTimeout(timeoutId);
 
@@ -123,8 +123,8 @@ const CustomerBooks = () => {
     try {
       console.time('loadFilters');
       const [genresResponse, authorsResponse] = await Promise.all([
-        genreService.getGenres({ per_page: 100 }), // Limit results
-        authorService.getAuthors({ per_page: 100 }) // Limit results
+        genreService.getGenres({ per_page: 100 }), 
+        authorService.getAuthors({ per_page: 100 }) 
       ]);
       console.timeEnd('loadFilters');
       

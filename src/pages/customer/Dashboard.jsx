@@ -96,7 +96,7 @@ const CustomerDashboard = () => {
 
   const handleAddToCart = (book) => {
     addToCart(book);
-    // Bisa tambahkan toast notification di sini
+    // toast notification di sini
   };
 
   const handleViewDetails = (bookId) => {

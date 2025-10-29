@@ -43,11 +43,6 @@ const Sidebar = ({ isOpen, onClose }) => {
       label: 'Transactions', 
       icon: <FiShoppingCart className="w-5 h-5" /> 
     },
-    // { 
-    //   path: '/admin/customers', 
-    //   label: 'Customers', 
-    //   icon: <FiUser className="w-5 h-5" /> 
-    // },
   ];
 
   const customerMenuItems = [

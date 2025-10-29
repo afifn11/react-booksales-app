@@ -26,7 +26,7 @@ const api = async (endpoint, options = {}) => {
 };
 
 export const customerService = {
-  // Menggunakan endpoint /users yang sudah ada di backend
+  
   getCustomers: async (params = {}) => {
     try {
       const queryString = new URLSearchParams(params).toString();

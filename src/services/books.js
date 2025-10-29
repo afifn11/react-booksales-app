@@ -3,7 +3,7 @@ export const bookService = {
     try {
 
       const defaultParams = {
-        per_page: 24, // Limit results
+        per_page: 24, 
         ...params
       };
       

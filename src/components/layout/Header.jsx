@@ -1,4 +1,3 @@
-import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { getInitials } from '../../utils/helpers';
 import { FiLogOut, FiMenu, FiBell, FiUser, FiBook } from 'react-icons/fi';

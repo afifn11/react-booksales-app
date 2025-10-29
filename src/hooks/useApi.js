@@ -2,12 +2,12 @@ import { useState } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/constants';
 
-// Buat instance axios untuk useApi hook
+// instance axios untuk useApi hook
 const apiInstance = axios.create({
   baseURL: API_BASE_URL,
 });
 
-// Tambahkan interceptor untuk token
+// interceptor untuk token
 apiInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');

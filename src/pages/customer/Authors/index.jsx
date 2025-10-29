@@ -1,5 +1,4 @@
 // src/pages/customer/Authors/index.jsx
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CustomerLayout from '../../../components/layout/CustomerLayout';

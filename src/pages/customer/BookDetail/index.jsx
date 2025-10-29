@@ -50,7 +50,7 @@ const BookDetail = () => {
 
   const handleAddToCart = () => {
     addToCart(book, quantity);
-    // Bisa tambahkan toast notification di sini
+    // Show notification here
   };
 
   const handleWishlist = () => {
